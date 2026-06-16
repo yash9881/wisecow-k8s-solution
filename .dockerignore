@@ -1,0 +1,7 @@
+.git
+.github
+k8s
+README.md
+*.md
+*.log
+node_modules

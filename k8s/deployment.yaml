@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wisecow
+  namespace: wisecow
+  labels:
+    app: wisecow
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: wisecow
+  template:
+    metadata:
+      labels:
+        app: wisecow
+    spec:
+      containers:
+        - name: wisecow
+          image: ghcr.io/OWNER/REPOSITORY:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 4499
+              name: http
+          env:
+            - name: SRVPORT
+              value: "4499"
+          readinessProbe:
+            tcpSocket:
+              port: 4499
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 4499
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
+            runAsUser: 10001
+            readOnlyRootFilesystem: false
