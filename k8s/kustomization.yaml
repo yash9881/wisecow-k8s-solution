@@ -8,4 +8,3 @@ resources:
   - issuer-selfsigned.yaml
   - certificate.yaml
   - ingress.yaml
-  - kubearmor-zero-trust-policy.yaml

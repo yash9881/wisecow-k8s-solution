@@ -7,7 +7,6 @@ This package contains a complete containerisation and Kubernetes deployment setu
 - `wisecow.sh`: Wisecow application source.
 - `Dockerfile`: Builds the app image with `cowsay`, `fortune`, and `netcat`.
 - `k8s/`: Kubernetes namespace, deployment, service, ingress, and TLS certificate manifests.
-- `k8s/kubearmor-zero-trust-policy.yaml`: KubeArmor zero-trust policy for the Wisecow workload.
 - `.github/workflows/ci-cd.yaml`: GitHub Actions pipeline that builds, pushes, and deploys the image.
 
 ## Build Locally
@@ -112,32 +111,3 @@ For Kind or Minikube, run the workflow on a self-hosted GitHub Actions runner th
 ## TLS
 
 The included manifests use cert-manager with a self-signed issuer for local Kind or Minikube testing. For a production domain, replace `issuer-selfsigned.yaml` with a Let's Encrypt `ClusterIssuer`, update `k8s/certificate.yaml` and `k8s/ingress.yaml` to use your real DNS name, and ensure that DNS points to your ingress controller.
-
-## KubeArmor Zero-Trust Policy
-
-The KubeArmor policy applies to pods with:
-
-```text
-app=wisecow
-```
-
-It uses an allowlist model for process execution and TCP networking. Expected Wisecow binaries such as `/app/wisecow.sh`, `/bin/bash`, `fortune`, `cowsay`, `nc`, `cat`, and `sleep` are allowed. Unexpected process execution inside the container is denied and reported as a policy violation.
-
-Apply the policy with the rest of the manifests:
-
-```bash
-kubectl apply -k k8s
-```
-
-Generate a test violation:
-
-```bash
-POD_NAME=$(kubectl -n wisecow get pods -l app=wisecow -o jsonpath='{.items[0].metadata.name}')
-kubectl -n wisecow exec "$POD_NAME" -- /usr/bin/whoami
-```
-
-View KubeArmor alerts:
-
-```bash
-karmor logs --namespace wisecow --type Alert
-```
